@@ -2,6 +2,11 @@ package RDF::Prefixes;
 
 use 5.008;
 use common::sense;
+use constant ARRAY_INDEX_USED      => 0;
+use constant ARRAY_INDEX_SUGGESTED => 1;
+use constant ARRAY_INDEX_OPTIONS   => 2;
+use overload '%{}' => \&to_hashref;
+use overload '""'  => \&to_string;
 
 use Carp qw[];
 
@@ -17,15 +22,16 @@ BEGIN
 
 sub new
 {
-	my ($class, $suggested) = @_;
+	my ($class, $suggested, $options) = @_;
 	$suggested ||= {};
-	my $self = {};
+	$options   ||= {};
+	my $self = [{}, {}, $options];
 		
 	foreach my $s (reverse sort keys %$suggested)
 	{
 		if ($s =~ /^[a-z0-9][a-z0-9_\.]*$/i)
 		{
-			$self->{suggested}{ $suggested->{$s} } = $s;
+			$self->[ARRAY_INDEX_SUGGESTED]{ $suggested->{$s} } = $s;
 		}
 		else
 		{
@@ -40,7 +46,7 @@ sub get_prefix
 {
 	my ($self, $url) = @_;
 	my $pp = $self->_practical_prefix($url);
-	$self->hashref->{ $pp } = $url;
+	$self->{ $pp } = $url;
 	return $pp;
 }
 
@@ -93,22 +99,24 @@ sub preview_curie
 	return $self->preview_prefix($p) . ':' . $s;
 }
 
-sub hashref
+sub to_hashref
 {
 	my ($self) = @_;
-	$self->{used} ||= {};
-	return $self->{used};
+	$self->[ARRAY_INDEX_USED] ||= {};
+	return $self->[ARRAY_INDEX_USED];
 }
+
+*TO_JSON = \&to_hashref;
 
 sub rdfa
 {
 	my ($self) = @_;
 	my $rv;
-	foreach my $prefix (sort keys %{ $self->hashref })
+	foreach my $prefix (sort keys %$self)
 	{
 		$rv .= sprintf("%s: %s ",
 			$prefix,
-			$self->hashref->{$prefix});
+			$self->{$prefix});
 	}
 	return substr($rv, 0, (length $rv) - 1);
 }
@@ -117,11 +125,11 @@ sub sparql
 {
 	my ($self) = @_;
 	my $rv;
-	foreach my $prefix (sort keys %{ $self->hashref })
+	foreach my $prefix (sort keys %$self)
 	{
 		$rv .= sprintf("PREFIX %s: <%s>\n",
 			$prefix,
-			$self->hashref->{$prefix});
+			$self->{$prefix});
 	}
 	return $rv;
 }
@@ -130,11 +138,11 @@ sub turtle
 {
 	my ($self) = @_;
 	my $rv;
-	foreach my $prefix (sort keys %{ $self->hashref })
+	foreach my $prefix (sort keys %$self)
 	{
 		$rv .= sprintf("\@prefix %s: <%s> .\n",
 			$prefix,
-			$self->hashref->{$prefix});
+			$self->{$prefix});
 	}
 	return $rv;
 }
@@ -143,13 +151,34 @@ sub xmlns
 {
 	my ($self) = @_;
 	my $rv;
-	foreach my $prefix (sort keys %{ $self->hashref })
+	foreach my $prefix (sort keys %$self)
 	{
 		$rv .= sprintf(" xmlns:%s=\"%s\"",
 			$prefix,
-			$self->hashref->{$prefix});
+			$self->{$prefix});
 	}
 	return $rv;
+}
+
+sub to_string
+{
+	my ($self) = @_;
+	if (lc $self->[ARRAY_INDEX_OPTIONS]{syntax} eq 'rdfa')
+	{
+		return $self->rdfa;
+	}
+	elsif (lc $self->[ARRAY_INDEX_OPTIONS]{syntax} eq 'sparql')
+	{
+		return $self->sparql;
+	}
+	elsif (lc $self->[ARRAY_INDEX_OPTIONS]{syntax} eq 'xmlns')
+	{
+		return $self->xmlns;
+	}
+	else
+	{
+		return $self->turtle;
+	}
 }
 
 sub _split_qname
@@ -203,22 +232,28 @@ sub _practical_prefix
 {
 	my ($self, $url) = @_;
 
-	while (my ($existing_prefix, $full) = each %{ $self->hashref })
+	while (my ($existing_prefix, $full) = each %$self)
 	{
 		return $existing_prefix if $full eq $url;
 	}
 	
-	my $perfect = $self->{suggested}{$url}
+	my $perfect = $self->[ARRAY_INDEX_SUGGESTED]{$url}
 		|| $self->_perfect_prefix($url)
 		|| 'ns';
-	return $perfect unless defined $self->hashref->{$perfect};
+	return $perfect unless $self->_already($perfect);
 	
 	my $i = 2;
-	while (defined $self->hashref->{$perfect . $i})
+	while ($self->_already($perfect.$i))
 	{
 		$i++;
 	}
-	return $perfect . $i;
+	return $perfect.$i;
+}
+
+sub _already
+{
+	my ($self, $prefix) = @_;
+	return grep { uc $prefix eq uc $_ } keys %$self;
 }
 
 1;
@@ -243,12 +278,17 @@ RDF::Prefixes - simple way to turn URIs into QNames.
 
 =over 4
 
-=item C<< new(\%suggestions) >>
+=item C<< new(\%suggestions, \%options) >>
 
 Creates a new RDF prefix context.
 
 Suggestions for prefix mappings may be given, but there's no guarantee
 that they'll be used.
+
+The only option right now is 'syntax' that is used by the toString
+method.
+
+Both hashrefs are optional.
 
 =back
 
@@ -278,32 +318,48 @@ return undef.
 C<< preview_qname($uri) >>,
 C<< preview_curie($uri) >>
 
-As per the "get" versions of these methods, but doesn't change the
+As per the "get" versions of these methods, but doesn't modify the
 context.
 
-=item C<< hashref >>
+=item C<< to_hashref >>
 
-Returns a hashref of prefix mappings used so far.
+Returns a hashref of prefix mappings used so far. This is not especially
+necessary as the object may be treated as a hashref directly:
+
+  foreach my $prefix (keys %$context)
+  {
+    printf("%s => %s\n", $prefix, $context->{$prefix});
+  }
 
 =item C<< rdfa >>
 
-Return the same data as C<hashref>, but as a string suitable for
+Return the same data as C<to_hashref>, but as a string suitable for
 placing in an RDFa 1.1 prefix attribute.
 
 =item C<< sparql >>
 
-Return the same data as C<hashref>, but as a string suitable for
+Return the same data as C<to_hashref>, but as a string suitable for
 prefixing a SPARQL query.
 
 =item C<< turtle >>
 
-Return the same data as C<hashref>, but as a string suitable for
+Return the same data as C<to_hashref>, but as a string suitable for
 prefixing a Turtle or Notation 3 file.
 
 =item C<< xmlns >>
 
-Return the same data as C<hashref>, but as a string of xmlns
+Return the same data as C<to_hashref>, but as a string of xmlns
 attributes, suitable for use with RDF/XML or RDFa.
+
+=item C<< to_string >>
+
+Calls either C<rdfa>, C<sparql>, C<turtle> (the default) or C<xmlns>, based on
+the 'syntax' option passed to the constructor. This module overloads
+the stringification operator, so calling toString is not usually needed.
+
+ my $context  = RDF::Prefixes->new({}, {syntax=>'turtle'});
+ my $dc_title = 'http://purl.org/dc/terms/title';
+ print "# Prefixes\n" . $context;
 
 =back
 
