@@ -262,7 +262,7 @@ __END__
 
 =head1 NAME
 
-RDF::Prefixes - simple way to turn URIs into QNames.
+RDF::Prefixes - simple way to turn URIs into QNames
 
 =head1 SYNOPSIS
 
