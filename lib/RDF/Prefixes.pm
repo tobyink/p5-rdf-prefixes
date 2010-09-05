@@ -212,7 +212,7 @@ sub _perfect_prefix
 	
 	return $chosen if length $chosen;
 
-	(my $extensionRemoved = $url) =~ /\.(owl|rdf|rdfx|rdfs|nt|ttl|turtle|xml)$/i;
+	(my $extensionRemoved = $url) =~ s/\.(owl|rdf|rdfx|rdfs|nt|ttl|turtle|xml)$//i;
 	my @words = split /[^A-Za-z0-9\._-]/, $extensionRemoved;
 	WORD: while (my $w = pop @words)
 	{
