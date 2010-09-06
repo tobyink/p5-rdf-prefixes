@@ -212,9 +212,8 @@ sub _perfect_prefix
 	
 	return $chosen if length $chosen;
 
-	(my $extensionRemoved = $url) =~ s/\.(owl|rdf|rdfx|rdfs|nt|ttl|turtle|xml)$//i;
-	my @words = split /[^A-Za-z0-9\._-]/, $extensionRemoved;
-	WORD: while (my $w = pop @words)
+	my @words = split /[^A-Za-z0-9\._-]/, $url;
+	WORD: while (defined(my $w = pop @words))
 	{
 		next unless length $w;
 		next if $w =~ /^[0-9\.-]+$/; # looks like a date or version number
@@ -224,6 +223,8 @@ sub _perfect_prefix
 		$chosen = $w;
 		last WORD;
 	}
+	
+	$chosen =~ s/\.(owl|rdf|rdfx|rdfs|nt|ttl|turtle|xml)$//i;
 	
 	return lc $chosen;
 }
