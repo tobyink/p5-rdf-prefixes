@@ -1,8 +1,6 @@
 #!/usr/bin/perl
 
 use 5.010;
-use common::sense;
-use lib "lib";
 use RDF::Prefixes;
 
 my $c = RDF::Prefixes->new({DC=>'http://example.com/'}, {syntax=>'sparql'});

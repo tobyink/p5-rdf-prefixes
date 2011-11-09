@@ -1,6 +1,6 @@
 package RDF::Prefixes;
 
-use 5.008;
+use 5.010;
 use common::sense;
 use constant ARRAY_INDEX_USED      => 0;
 use constant ARRAY_INDEX_SUGGESTED => 1;
@@ -10,11 +10,13 @@ use overload '""'  => \&to_string;
 
 use Carp qw[];
 
-our $VERSION = '0.001';
-our ($r_nameStartChar, $r_nameChar, $r_prefix);
+BEGIN {
+	$RDF::Prefixes::AUTHORITY = 'cpan:TOBYINK';
+	$RDF::Prefixes::VERSION   = '0.002';
+}
 
-BEGIN
-{
+our ($r_nameStartChar, $r_nameChar, $r_prefix);
+BEGIN {
 	$r_nameStartChar = qr'[A-Za-z\x{00C0}-\x{00D6}\x{00D8}-\x{00F6}\x{00F8}-\x{02FF}\x{0370}-\x{037D}\x{037F}-\x{1FFF}\x{200C}-\x{200D}\x{2070}-\x{218F}\x{2C00}-\x{2FEF}\x{3001}-\x{D7FF}\x{F900}-\x{FDCF}\x{FDF0}-\x{FFFD}\x{00010000}-\x{000EFFFF}]';
 	$r_nameChar      = qr'${r_nameStartChar}|[-_0-9\x{b7}\x{0300}-\x{036f}\x{203F}-\x{2040}]';
 	$r_prefix        = qr'${r_nameStartChar}${r_nameChar}*';
@@ -208,6 +210,7 @@ sub _perfect_prefix
 		'http://www.w3.org/2000/01/rdf-schema#'       => 'rdfs',
 		'http://www.w3.org/2002/07/owl#'              => 'owl',
 		'http://www.w3.org/2001/XMLSchema#'           => 'xsd',
+		'http://schema.org/'                          => 'schema',
 		}->{$url};
 	
 	return $chosen if length $chosen;
@@ -224,23 +227,25 @@ sub _perfect_prefix
 		last WORD;
 	}
 	
-	$chosen =~ s/\.(owl|rdf|rdfx|rdfs|nt|ttl|turtle|xml)$//i;
-	
+	$chosen =~ s/\.(owl|rdf|rdfx|rdfs|nt|ttl|turtle|xml|org|com|net)$//i;
+	$chosen = 'ex' if $chosen eq 'example';
+	return undef unless length $chosen;	
 	return lc $chosen;
 }
 
 sub _practical_prefix
 {
 	my ($self, $url) = @_;
-
-	while (my ($existing_prefix, $full) = each %$self)
+	
+	my %existing = %{ $self->[ARRAY_INDEX_USED] };
+	while (my ($existing_prefix, $full) = each %existing)
 	{
 		return $existing_prefix if $full eq $url;
 	}
 	
 	my $perfect = $self->[ARRAY_INDEX_SUGGESTED]{$url}
-		|| $self->_perfect_prefix($url)
-		|| 'ns';
+		// $self->_perfect_prefix($url)
+		// 'ns';
 	return $perfect unless $self->_already($perfect);
 	
 	my $i = 2;
@@ -275,6 +280,16 @@ RDF::Prefixes - simple way to turn URIs into QNames
 
 =head1 DESCRIPTION
 
+This module is not so much for managing namespaces/prefixes in code (see
+L<RDF::Trine::NamespaceMap> for that), but as a helper for code that
+serialises data using namespaces.
+
+It generates pretty prefixes, reducing "http://purl.org/dc/terms/"
+to "dc" rather than something anonymous like like "ns01", and provides
+a context for keeping track of namespaces already used, so that when
+"http://purl.org/dc/elements/1.1/" is encountered, it won't stomp on
+the previous definition of "dc".
+
 =head2 Constructor
 
 =over 4
@@ -286,7 +301,7 @@ Creates a new RDF prefix context.
 Suggestions for prefix mappings may be given, but there's no guarantee
 that they'll be used.
 
-The only option right now is 'syntax' that is used by the toString
+The only option right now is 'syntax' that is used by the to_string
 method.
 
 Both hashrefs are optional.
@@ -332,6 +347,10 @@ necessary as the object may be treated as a hashref directly:
     printf("%s => %s\n", $prefix, $context->{$prefix});
   }
 
+=item C<< TO_JSON >>
+
+A synonym for to_hashref, provided for the benefit of the L<JSON> package.
+
 =item C<< rdfa >>
 
 Return the same data as C<to_hashref>, but as a string suitable for
@@ -356,7 +375,8 @@ attributes, suitable for use with RDF/XML or RDFa.
 
 Calls either C<rdfa>, C<sparql>, C<turtle> (the default) or C<xmlns>, based on
 the 'syntax' option passed to the constructor. This module overloads
-the stringification operator, so calling toString is not usually needed.
+the stringification operator, so explicitly calling to_string is rarely
+necessary.
 
  my $context  = RDF::Prefixes->new({}, {syntax=>'turtle'});
  my $dc_title = 'http://purl.org/dc/terms/title';
@@ -374,9 +394,13 @@ Toby Inkster E<lt>tobyink@cpan.orgE<gt>.
 
 =head1 COPYRIGHT
 
-Copyright 2010 Toby Inkster
+Copyright 2010-2011 Toby Inkster
 
 This library is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
 
-=cut
+=head1 DISCLAIMER OF WARRANTIES
+
+THIS PACKAGE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR IMPLIED
+WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
+MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
