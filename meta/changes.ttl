@@ -42,6 +42,7 @@ my:v_0-003
 		dcs:versus my:v_0-002 ;
 		dcs:item   [ rdfs:label "Copyright 2012."@en ; a dcs:Update ];
 		dcs:item   [ rdfs:label "Add test case covering warning message."@en ; a dcs:Packaging ];
+		dcs:item   [ rdfs:label "Add test case covering utf8 support."@en ; a dcs:Packaging ];
 		dcs:item   [ rdfs:label "Remove unneeded dependencies."@en ];
 		dcs:item   [ rdfs:label "Fix typo."@en; a dcs:Documentation; dcs:thanks _:sm ];
 		dcs:item   [ rdfs:label "Review regular expressions for QNames."@en; dcs:thanks _:sm ];

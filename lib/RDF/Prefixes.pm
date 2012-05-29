@@ -449,6 +449,14 @@ necessary.
 
 =back
 
+=head2 Internationalisation
+
+Strings passed to and from this module are expected to be utf8 character
+strings, not byte strings. This is not explicitly checked for, but will
+be checked in a future version, so be warned!
+
+URIs containing non-Latin characters should "just work".
+
 =head1 BUGS
 
 Please report any bugs to L<http://rt.cpan.org/>.
