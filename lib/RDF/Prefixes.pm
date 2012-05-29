@@ -7,6 +7,7 @@ use constant ARRAY_INDEX_SUGGESTED => 1;
 use constant ARRAY_INDEX_OPTIONS   => 2;
 use overload '%{}' => \&to_hashref;
 use overload '""'  => \&to_string;
+use utf8;
 
 BEGIN {
 	eval 'use Carp; 1'
