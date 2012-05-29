@@ -35,7 +35,7 @@ _:sm a foaf:Person ;
 my:project :release my:v_0-003 .
 my:v_0-003
 	a               :Version ;
-	dc:issued       "2011-11-29"^^xsd:date ;
+	dc:issued       "2012-05-31"^^xsd:date ;
 	:revision       "0.003"^^xsd:string ;
 	:file-release   <http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-Prefixes-0.003.tar.gz> ;
 	dcs:changeset [
