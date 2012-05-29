@@ -1,4 +1,4 @@
-use Test::More tests => 7;
+use Test::More tests => 10;
 use RDF::Prefixes;
 use utf8;
 
@@ -10,6 +10,9 @@ foreach ((
 	['http://purl.org/øt/foo'       => 'øt:foo',  'interesting char at start of prefix'],
 	['http://purl.org/tØt/foo'      => 'tøt:foo', 'interesting char in prefix, lowercased'],
 	['http://purl.org/Øt/foo'       => 'øt:foo',  'interesting char at start of prefix, lowercased'],
+	['http://example.com/τωβυ#ινκστερ' => 'τωβυ:ινκστερ', 'some Greek letters'],
+	['http://example.com/Τωβυ#Ινκστερ' => 'τωβυ:Ινκστερ', 'some Greek letters, lowercased'],
+	['http://example.com/トビー#インケ'  => 'トビー:インケ',  'some katakana'],
 ))
 {
 	is(
