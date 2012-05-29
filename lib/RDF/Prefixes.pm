@@ -2,15 +2,18 @@ package RDF::Prefixes;
 
 use 5.010;
 use strict;
-use constant ARRAY_INDEX_USED      => 0;
-use constant ARRAY_INDEX_SUGGESTED => 1;
-use constant ARRAY_INDEX_OPTIONS   => 2;
+use constant {
+	IDX_USED      => 0,
+	IDX_SUGGESTED => 1,
+	IDX_OPTIONS   => 2,
+	NEXT_IDX      => 3,
+};
 use overload '%{}' => \&to_hashref;
 use overload '""'  => \&to_string;
 use utf8;
 
 BEGIN {
-	eval 'use Carp; 1'
+	eval 'use Carp qw(carp); 1'
 	or eval 'sub carp { warn "$_[0]\n" }'
 }
 
@@ -88,7 +91,7 @@ sub new
 	{
 		if ($s =~ m< ^ $PN_PREFIX $ >ix)
 		{
-			$self->[ARRAY_INDEX_SUGGESTED]{ $suggested->{$s} } = $s;
+			$self->[IDX_SUGGESTED]{ $suggested->{$s} } = $s;
 		}
 		else
 		{
@@ -168,8 +171,8 @@ sub preview_curie
 sub to_hashref
 {
 	my ($self) = @_;
-	$self->[ARRAY_INDEX_USED] ||= {};
-	return $self->[ARRAY_INDEX_USED];
+	$self->[IDX_USED] ||= {};
+	return $self->[IDX_USED];
 }
 
 *TO_JSON = \&to_hashref;
@@ -229,15 +232,15 @@ sub xmlns
 sub to_string
 {
 	my ($self) = @_;
-	if (lc $self->[ARRAY_INDEX_OPTIONS]{syntax} eq 'rdfa')
+	if (lc $self->[IDX_OPTIONS]{syntax} eq 'rdfa')
 	{
 		return $self->rdfa;
 	}
-	elsif (lc $self->[ARRAY_INDEX_OPTIONS]{syntax} eq 'sparql')
+	elsif (lc $self->[IDX_OPTIONS]{syntax} eq 'sparql')
 	{
 		return $self->sparql;
 	}
-	elsif (lc $self->[ARRAY_INDEX_OPTIONS]{syntax} eq 'xmlns')
+	elsif (lc $self->[IDX_OPTIONS]{syntax} eq 'xmlns')
 	{
 		return $self->xmlns;
 	}
@@ -302,13 +305,13 @@ sub _practical_prefix
 {
 	my ($self, $url) = @_;
 	
-	my %existing = %{ $self->[ARRAY_INDEX_USED] };
+	my %existing = %{ $self->[IDX_USED] };
 	while (my ($existing_prefix, $full) = each %existing)
 	{
 		return $existing_prefix if $full eq $url;
 	}
 	
-	my $perfect = $self->[ARRAY_INDEX_SUGGESTED]{$url}
+	my $perfect = $self->[IDX_SUGGESTED]{$url}
 		// $self->_perfect_prefix($url)
 		// 'ns';
 	return $perfect unless $self->_already($perfect);
