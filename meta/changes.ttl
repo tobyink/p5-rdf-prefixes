@@ -27,3 +27,24 @@ my:v_0-002
 		dcs:item   [ rdfs:label "Module::Package::RDF" ; a dcs:Packaging ] ;
 		dcs:item   [ rdfs:label "use 5.010" ; a dcs:Update ]
 		] .
+
+_:sm a foaf:Person ;
+	foaf:name "Saašha Metsärantala" ;
+	foaf:mbox_sha1sum "5864440b7beefff0c8811ec0a4ef7bba0804e5fc" .
+
+my:project :release my:v_0-003 .
+my:v_0-003
+	a               :Version ;
+	dc:issued       "2011-11-29"^^xsd:date ;
+	:revision       "0.003"^^xsd:string ;
+	:file-release   <http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-Prefixes-0.003.tar.gz> ;
+	dcs:changeset [
+		dcs:versus my:v_0-002 ;
+		dcs:item   [ rdfs:label "Copyright 2012."@en ; a dcs:Update ];
+		dcs:item   [ rdfs:label "Add test case covering warning message."@en ; a dcs:Packaging ];
+		dcs:item   [ rdfs:label "Remove unneeded dependencies."@en ];
+		dcs:item   [ rdfs:label "Fix typo."@en; a dcs:Documentation; dcs:thanks _:sm ];
+		dcs:item   [ rdfs:label "Review regular expressions for QNames."@en; dcs:thanks _:sm ];
+		dcs:item   [ rdfs:label "Disallow other vocabularies squatting on 'xsd' prefix."@en; dcs:thanks _:sm ];
+		dcs:item   [ rdfs:label "Remove some redundant regular expressions."@en; dcs:thanks _:sm ]
+		] .

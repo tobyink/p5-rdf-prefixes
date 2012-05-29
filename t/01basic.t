@@ -38,8 +38,8 @@ is($context->{ substr($foo0, 0, (length $foo0) - 1) },
 	'get_curie returned something sensible!');
 
 is("$context", <<'TURTLE', "output seems OK");
-@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix foaf:  <http://xmlns.com/foaf/0.1/> .
 @prefix foaf2: <http://xmlns.com/foaf/1.0/> .
-@prefix foo: <http://example.com/foo.rdf#> .
-@prefix foo2: <http://example.com/foo.rdf#0> .
+@prefix foo:   <http://example.com/foo.rdf#> .
+@prefix foo2:  <http://example.com/foo.rdf#0> .
 TURTLE
