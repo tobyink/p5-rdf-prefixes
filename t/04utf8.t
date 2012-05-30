@@ -1,4 +1,4 @@
-use Test::More tests => 10;
+use Test::More tests => 11;
 use RDF::Prefixes;
 use utf8;
 
@@ -13,6 +13,7 @@ foreach ((
 	['http://example.com/τωβυ#ινκστερ' => 'τωβυ:ινκστερ', 'some Greek letters'],
 	['http://example.com/Τωβυ#Ινκστερ' => 'τωβυ:Ινκστερ', 'some Greek letters, lowercased'],
 	['http://example.com/トビー#インケ'  => 'トビー:インケ',  'some katakana'],
+	['http://example.com/𝕥𝕠𝕓𝕪/𝕚𝕟𝕜𝕤𝕥𝕖𝕣' => '𝕥𝕠𝕓𝕪:𝕚𝕟𝕜𝕤𝕥𝕖𝕣', 'some non-BMP characters'],
 ))
 {
 	is(
