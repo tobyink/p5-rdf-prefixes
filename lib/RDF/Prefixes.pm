@@ -265,7 +265,7 @@ sub _split_qname
 }
 
 my $looks_like_version = qr< ^ [0-9\.-]+ $ >x;
-my $too_generic        = [qw< terms ns vocab vocabulary rdf rdfs owl schema xsd >];
+my $too_generic        = qr< ^(?: terms|ns|vocab|vocabulary|rdf|rdfs|owl|schema|xsd )$ >x;
 
 sub _perfect_prefix
 {
@@ -286,8 +286,8 @@ sub _perfect_prefix
 	{
 		next WORD if (
 			   length $w < 1
-			or $w ~~ $looks_like_version
-			or $w ~~ $too_generic
+			or $w =~ $looks_like_version
+			or $w =~ $too_generic
 			or $w !~ m< ^ $PN_PREFIX $ >x
 		);
 		
