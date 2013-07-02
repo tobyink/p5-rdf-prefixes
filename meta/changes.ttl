@@ -26,7 +26,7 @@ my:v_0-002
 		dcs:item   [ rdfs:label "Occasionally a new prefix was defined when we could have reused an old one."@en ; a dcs:Bugfix ] ;
 		dcs:item   [ rdfs:label "Module::Package::RDF" ; a dcs:Packaging ] ;
 		dcs:item   [ rdfs:label "use 5.010" ; a dcs:Update ]
-		] .
+	] .
 
 _:sm a foaf:Person ;
 	foaf:name "Saašha Metsärantala" ;
@@ -48,4 +48,16 @@ my:v_0-003
 		dcs:item   [ rdfs:label "Review regular expressions for QNames."@en; dcs:thanks _:sm ];
 		dcs:item   [ rdfs:label "Disallow other vocabularies squatting on 'xsd' prefix."@en; dcs:thanks _:sm ];
 		dcs:item   [ rdfs:label "Remove some redundant regular expressions."@en; dcs:thanks _:sm ]
-		] .
+	] .
+
+my:project :release my:v_0-004 .
+my:v_0-004
+	a               :Version ;
+	dc:issued       "2013-07-02"^^xsd:date ;
+	:revision       "0.004"^^xsd:string ;
+	:file-release   <http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-Prefixes-0.004.tar.gz> ;
+	dcs:changeset [
+		dcs:versus my:v_0-003 ;
+		dcs:item   [ rdfs:label "Copyright 2013."@en ; a dcs:Update ];
+		dcs:item   [ rdfs:label "Drop usage of smartmatch operator."@en ; a dcs:Update ];
+	] .
