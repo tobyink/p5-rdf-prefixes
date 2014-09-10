@@ -1,0 +1,6 @@
+@prefix deps:  <http://ontologi.es/doap-deps#> .
+
+<http://purl.org/NET/cpan-uri/dist/RDF-Prefixes/project>
+	deps:test-requirement            [ deps:on "Test::More 0.61"^^deps:CpanId ];
+	deps:test-requirement            [ deps:on "Test::Warn"^^deps:CpanId ].
+
