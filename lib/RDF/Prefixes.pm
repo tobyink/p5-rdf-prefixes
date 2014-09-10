@@ -19,7 +19,7 @@ BEGIN {
 
 BEGIN {
 	$RDF::Prefixes::AUTHORITY = 'cpan:TOBYINK';
-	$RDF::Prefixes::VERSION   = '0.004';
+	$RDF::Prefixes::VERSION   = '0.005';
 }
 
 # These are the rules from Turtle (W3C WD, dated 09 Aug 2011).

@@ -61,3 +61,10 @@ my:v_0-004
 		dcs:item   [ rdfs:label "Copyright 2013."@en ; a dcs:Update ];
 		dcs:item   [ rdfs:label "Drop usage of smartmatch operator."@en ; a dcs:Update ];
 	] .
+
+`RDF-Prefixes 0.005 cpan:TOBYINK`
+	issued    2014-09-10;
+	changeset [
+		item "Switch to Dist::Inkt."^^Packaging;
+	].
+
